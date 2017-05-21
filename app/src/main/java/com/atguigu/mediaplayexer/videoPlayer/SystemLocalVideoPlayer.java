@@ -1,8 +1,12 @@
 package com.atguigu.mediaplayexer.videoPlayer;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -58,6 +62,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         findViews();
         //设置监听
         setListener();
+        //得到电量
+        getBattery();
 
 
     }
@@ -106,7 +112,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         sbVideoPragressControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(fromUser) {
+                if (fromUser) {
                     vv_player.seekTo(progress);
                 }
 
@@ -215,4 +221,49 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         return dateFormat.format(new Date());
 
     }
+
+    public void getBattery() {
+
+        BatteryReceiver receiver = new BatteryReceiver();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        registerReceiver(receiver, filter);
+
+    }
+
+    class BatteryReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+
+            setBatteryStatus(level);
+        }
+
+        private void setBatteryStatus(int level) {
+            if (level <= 0) {
+                ivBattery.setBackgroundResource(R.drawable.ic_battery_0);
+            } else if (level > 0 && level <= 10) {
+                ivBattery.setImageResource(R.drawable.ic_battery_10);
+            } else if (level > 10 && level <= 20) {
+                ivBattery.setImageResource(R.drawable.ic_battery_20);
+            } else if (level > 20 && level <= 40) {
+                ivBattery.setImageResource(R.drawable.ic_battery_40);
+            } else if (level > 40 && level <= 60) {
+                ivBattery.setImageResource(R.drawable.ic_battery_60);
+            } else if (level > 60 && level <= 80) {
+                ivBattery.setImageResource(R.drawable.ic_battery_80);
+            } else if (level > 80 && level <= 100) {
+                ivBattery.setImageResource(R.drawable.ic_battery_100);
+            } else {
+                ivBattery.setImageResource(R.drawable.ic_battery_100);
+            }
+
+
+        }
+
+    }
+
+
 }
