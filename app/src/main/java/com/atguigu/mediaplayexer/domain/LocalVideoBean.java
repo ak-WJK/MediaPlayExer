@@ -1,10 +1,12 @@
 package com.atguigu.mediaplayexer.domain;
 
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 2017/5/19.
  */
 
-public class LocalVideoBean {
+public class LocalVideoBean implements Serializable {
     private String videoName;
     private long size;
     private long duration;

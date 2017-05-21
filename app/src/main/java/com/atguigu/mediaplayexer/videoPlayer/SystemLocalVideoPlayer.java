@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -21,12 +22,35 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.atguigu.mediaplayexer.R;
+import com.atguigu.mediaplayexer.domain.LocalVideoBean;
 import com.atguigu.mediaplayexer.utils.Utils;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class SystemLocalVideoPlayer extends AppCompatActivity implements View.OnClickListener {
+
+    private VideoView vv_player;
+    private RelativeLayout llVideoInfo;
+    private TextView tvVideoName;
+    private ImageView ivBattery;
+    private TextView tvSystemTime;
+    private LinearLayout llTopControls;
+    private ImageButton ibVolune;
+    private SeekBar sbVolumeControl;
+    private ImageButton ivShera;
+    private LinearLayout llBottemControls;
+    private TextView tvVideoTime;
+    private SeekBar sbVideoPragressControl;
+    private TextView tvVideoTotaltime;
+    private LinearLayout llControlButton;
+    private ImageButton ibBack;
+    private ImageButton ibPre;
+    private ImageButton ibSwitchcontrol;
+    private ImageButton ibNext;
+    private ImageButton ibFullscreen;
+
 
     private static final int PROGRESS = 1;
     private Utils utils;
@@ -53,6 +77,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
         }
     };
+    private ArrayList<LocalVideoBean> mDatas;
+    private int position;
+    private Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,13 +87,23 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         utils = new Utils();
         //初始化所有控件
         findViews();
+        //得到播放列表
+        getmDatas();
+
+
         //设置监听
         setListener();
+
+        //设置播放列表
+        setmDatas();
+
+
         //得到电量
         getBattery();
 
 
     }
+
 
     private void setListener() {
         //设置播放的三个监听事件
@@ -90,8 +127,10 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         vv_player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                finish();
+                //设置自动播放下一个视频
+                setplayerNext();
             }
+
         });
 
         vv_player.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -102,9 +141,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         });
 
         //设置播放地址
-        Intent intent = getIntent();
-        Uri uri = intent.getData();
-        vv_player.setVideoURI(uri);
+//        Intent intent = getIntent();
+//        Uri uri = intent.getData();
+//        vv_player.setVideoURI(uri);
 
 //        vv_player.setMediaController(new MediaController(this));
 
@@ -133,25 +172,150 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
     }
 
-    private VideoView vv_player;
-    private RelativeLayout llVideoInfo;
-    private TextView tvVideoName;
-    private ImageView ivBattery;
-    private TextView tvSystemTime;
-    private LinearLayout llTopControls;
-    private ImageButton ibVolune;
-    private SeekBar sbVolumeControl;
-    private ImageButton ivShera;
-    private LinearLayout llBottemControls;
-    private TextView tvVideoTime;
-    private SeekBar sbVideoPragressControl;
-    private TextView tvVideoTotaltime;
-    private LinearLayout llControlButton;
-    private ImageButton ibBack;
-    private ImageButton ibPre;
-    private ImageButton ibSwitchcontrol;
-    private ImageButton ibNext;
-    private ImageButton ibFullscreen;
+    //设置自动播放下一个视频
+    private void setplayerNext() {
+
+        if (mDatas != null && mDatas.size() > 0) {
+            position++;
+            if (position < mDatas.size()) {
+                LocalVideoBean videoBean = mDatas.get(position);
+                //得到并设置视频名称
+                tvVideoName.setText(videoBean.getVideoName());
+                //得到并设置播放地址
+                vv_player.setVideoPath(videoBean.getVideoAddress());
+
+            } else {
+                finish();
+            }
+
+
+        }
+
+
+    }
+
+
+    /**
+     * Handle button click events<br />
+     * <br />
+     * Auto-created on 2017-05-21 20:18:24 by Android Layout Finder
+     * (http://www.buzzingandroid.com/tools/android-layout-finder)
+     */
+    @Override
+    public void onClick(View v) {
+        if (v == ibVolune) {
+            // Handle clicks for ibVolune
+        } else if (v == ivShera) {
+            // Handle clicks for ivShera
+        } else if (v == ibBack) {
+            finish();
+        } else if (v == ibPre) {
+            // Handle clicks for ibPre
+        } else if (v == ibSwitchcontrol) {
+
+            setPlayerAndPause();
+
+        } else if (v == ibNext) {
+            // Handle clicks for ibNext
+        } else if (v == ibFullscreen) {
+            // Handle clicks for ibFullscreen
+        }
+    }
+
+    //设置播放和暂停
+    private void setPlayerAndPause() {
+        if (vv_player.isPlaying()) {
+            vv_player.pause();
+            ibSwitchcontrol.setBackgroundResource(R.drawable.media_switchcontrol2_select);
+        } else {
+            vv_player.start();
+            ibSwitchcontrol.setBackgroundResource(R.drawable.media_switchcontrol1_select);
+        }
+    }
+
+
+    public String getSystemTime() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        return dateFormat.format(new Date());
+
+    }
+
+
+    //得到电量改变
+    public void getBattery() {
+
+        BatteryReceiver receiver = new BatteryReceiver();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        registerReceiver(receiver, filter);
+
+    }
+
+    //设置播放列表
+    private void setmDatas() {
+        if (mDatas != null && mDatas.size() > 0) {
+
+            LocalVideoBean videoBean = mDatas.get(position);
+
+            //得到播放地址
+            vv_player.setVideoPath(videoBean.getVideoAddress());
+            tvVideoName.setText(videoBean.getVideoName());
+        } else if (uri != null) {
+            vv_player.setVideoURI(uri);
+
+        }
+
+
+    }
+
+
+    //得到数据列表
+    public void getmDatas() {
+
+        uri = getIntent().getData();
+
+        mDatas = (ArrayList<LocalVideoBean>) getIntent().getSerializableExtra("mDatas");
+        position = getIntent().getIntExtra("position", 0);
+
+        Log.e("TAG", "mData " + mDatas.size());
+        Log.e("TAG", "position " + position);
+
+
+    }
+
+    class BatteryReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+
+            setBatteryStatus(level);
+        }
+
+        private void setBatteryStatus(int level) {
+            if (level <= 0) {
+                ivBattery.setBackgroundResource(R.drawable.ic_battery_0);
+            } else if (level > 0 && level <= 10) {
+                ivBattery.setImageResource(R.drawable.ic_battery_10);
+            } else if (level > 10 && level <= 20) {
+                ivBattery.setImageResource(R.drawable.ic_battery_20);
+            } else if (level > 20 && level <= 40) {
+                ivBattery.setImageResource(R.drawable.ic_battery_40);
+            } else if (level > 40 && level <= 60) {
+                ivBattery.setImageResource(R.drawable.ic_battery_60);
+            } else if (level > 60 && level <= 80) {
+                ivBattery.setImageResource(R.drawable.ic_battery_80);
+            } else if (level > 80 && level <= 100) {
+                ivBattery.setImageResource(R.drawable.ic_battery_100);
+            } else {
+                ivBattery.setImageResource(R.drawable.ic_battery_100);
+            }
+
+        }
+
+    }
+
 
     /**
      * Find the Views in the layout<br />
@@ -188,96 +352,6 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         ibSwitchcontrol.setOnClickListener(this);
         ibNext.setOnClickListener(this);
         ibFullscreen.setOnClickListener(this);
-    }
-
-
-    /**
-     * Handle button click events<br />
-     * <br />
-     * Auto-created on 2017-05-21 20:18:24 by Android Layout Finder
-     * (http://www.buzzingandroid.com/tools/android-layout-finder)
-     */
-    @Override
-    public void onClick(View v) {
-        if (v == ibVolune) {
-            // Handle clicks for ibVolune
-        } else if (v == ivShera) {
-            // Handle clicks for ivShera
-        } else if (v == ibBack) {
-            finish();
-        } else if (v == ibPre) {
-            // Handle clicks for ibPre
-        } else if (v == ibSwitchcontrol) {
-            setPlayerAndPause();
-
-
-        } else if (v == ibNext) {
-            // Handle clicks for ibNext
-        } else if (v == ibFullscreen) {
-            // Handle clicks for ibFullscreen
-        }
-    }
-
-//设置播放和暂停
-    private void setPlayerAndPause() {
-        if (vv_player.isPlaying()) {
-            vv_player.pause();
-            ibSwitchcontrol.setBackgroundResource(R.drawable.media_switchcontrol2_select);
-        } else {
-            vv_player.start();
-            ibSwitchcontrol.setBackgroundResource(R.drawable.media_switchcontrol1_select);
-        }
-    }
-
-
-    public String getSystemTime() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-        return dateFormat.format(new Date());
-
-    }
-
-
-    //得到电量改变
-    public void getBattery() {
-
-        BatteryReceiver receiver = new BatteryReceiver();
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        registerReceiver(receiver, filter);
-
-    }
-
-    class BatteryReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-
-            setBatteryStatus(level);
-        }
-
-        private void setBatteryStatus(int level) {
-            if (level <= 0) {
-                ivBattery.setBackgroundResource(R.drawable.ic_battery_0);
-            } else if (level > 0 && level <= 10) {
-                ivBattery.setImageResource(R.drawable.ic_battery_10);
-            } else if (level > 10 && level <= 20) {
-                ivBattery.setImageResource(R.drawable.ic_battery_20);
-            } else if (level > 20 && level <= 40) {
-                ivBattery.setImageResource(R.drawable.ic_battery_40);
-            } else if (level > 40 && level <= 60) {
-                ivBattery.setImageResource(R.drawable.ic_battery_60);
-            } else if (level > 60 && level <= 80) {
-                ivBattery.setImageResource(R.drawable.ic_battery_80);
-            } else if (level > 80 && level <= 100) {
-                ivBattery.setImageResource(R.drawable.ic_battery_100);
-            } else {
-                ivBattery.setImageResource(R.drawable.ic_battery_100);
-            }
-
-        }
-
     }
 
 
