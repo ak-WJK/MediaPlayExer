@@ -33,6 +33,8 @@ import java.util.Date;
 
 public class SystemLocalVideoPlayer extends AppCompatActivity implements View.OnClickListener {
 
+    private static final int SHOW_HIDE_CONTROL = 2;
+    private RelativeLayout rl_layout;
     private VideoView vv_player;
     private RelativeLayout llVideoInfo;
     private TextView tvVideoName;
@@ -78,6 +80,11 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
 
                     break;
+                case SHOW_HIDE_CONTROL:
+
+                    hideControl();
+
+                    break;
             }
 
         }
@@ -85,6 +92,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private ArrayList<LocalVideoBean> mDatas;
     private int position;
     private Uri uri;
+    private BatteryReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +142,17 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (isShow) {
+                    hideControl();
+                    handler.removeMessages(SHOW_HIDE_CONTROL);
+                } else {
+                    showControl();
+                    handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
+                }
+
+
                 return super.onSingleTapConfirmed(e);
+
             }
 
 
@@ -142,6 +160,20 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
 
     }
+
+    private boolean isShow;
+
+    public void showControl() {
+        rl_layout.setVisibility(View.VISIBLE);
+        isShow = true;
+
+    }
+
+    public void hideControl() {
+        rl_layout.setVisibility(View.GONE);
+        isShow = false;
+    }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -165,6 +197,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                 //发送消息
                 handler.sendEmptyMessage(PROGRESS);
 
+                handler.removeMessages(SHOW_HIDE_CONTROL);
+                handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
 
             }
         });
@@ -198,6 +232,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     vv_player.seekTo(progress);
+
+                    handler.removeMessages(SHOW_HIDE_CONTROL);
+                    handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
                 }
 
 
@@ -256,12 +293,22 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             finish();
         } else if (v == ibPre) {
             setPlayerPre();
-        } else if (v == ibSwitchcontrol) {
 
+            handler.removeMessages(SHOW_HIDE_CONTROL);
+            handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
+
+        } else if (v == ibSwitchcontrol) {
             setPlayerAndPause();
+
+            handler.removeMessages(SHOW_HIDE_CONTROL);
+            handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
 
         } else if (v == ibNext) {
             setplayerNext();
+
+            handler.removeMessages(SHOW_HIDE_CONTROL);
+            handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
+
         } else if (v == ibFullscreen) {
             // Handle clicks for ibFullscreen
         }
@@ -328,7 +375,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     //得到电量改变
     public void getBattery() {
 
-        BatteryReceiver receiver = new BatteryReceiver();
+        receiver = new BatteryReceiver();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
@@ -428,6 +475,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
      */
     private void findViews() {
         setContentView(R.layout.activity_system_local_video_player);
+        rl_layout = (RelativeLayout) findViewById(R.id.rl_layout);
         vv_player = (VideoView) findViewById(R.id.vv_player);
         llVideoInfo = (RelativeLayout) findViewById(R.id.ll_video_info);
         tvVideoName = (TextView) findViewById(R.id.tv_video_name);
@@ -457,5 +505,10 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         ibFullscreen.setOnClickListener(this);
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
+        handler.removeCallbacksAndMessages(null);
+    }
 }
