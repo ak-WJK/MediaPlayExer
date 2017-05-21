@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -101,7 +100,31 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         Uri uri = intent.getData();
         vv_player.setVideoURI(uri);
 
-        vv_player.setMediaController(new MediaController(this));
+//        vv_player.setMediaController(new MediaController(this));
+
+        //设置视频播放seekBar的监听
+        sbVideoPragressControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(fromUser) {
+                    vv_player.seekTo(progress);
+                }
+
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+
     }
 
     private VideoView vv_player;
