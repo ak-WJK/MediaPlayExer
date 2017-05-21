@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -100,6 +101,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private int screenWidth;
     private int videoHeight;
     private int videoWidth;
+    private AudioManager am;
+    private int currentVolume;
+    private int maxVolume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +114,14 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
         //实现手势识别器
         setGestureDetector();
+        //得到音量
+        getVolume();
+
+        //关联最大音量
+        sbVolumeControl.setMax(maxVolume);
+        //设置当前进度
+        sbVolumeControl.setProgress(currentVolume);
+
 
         //得到播放列表
         getmDatas();
@@ -180,6 +192,12 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         getScreenWidthAndHeight();
 
 
+    }
+
+    private void getVolume() {
+        am = (AudioManager) getSystemService(AUDIO_SERVICE);
+        currentVolume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+        maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
     }
 
     private void getScreenWidthAndHeight() {
@@ -287,6 +305,48 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             }
         });
 
+        //设置音量的监听
+        sbVolumeControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    updateVolume(progress);
+                    handler.removeMessages(SHOW_HIDE_CONTROL);
+                    handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
+                }
+
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+
+    }
+
+    private boolean isMute = false;
+
+    private void updateVolume(int progress) {
+
+        currentVolume = progress;
+
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
+        sbVolumeControl.setProgress(currentVolume);
+
+        if (currentVolume <= 0) {
+            isMute = true;
+        } else {
+            isMute = false;
+        }
+
 
     }
 
@@ -323,6 +383,13 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     public void onClick(View v) {
         if (v == ibVolune) {
             // Handle clicks for ibVolune
+            isMute = !isMute;
+            volumeStart(isMute);
+
+            handler.removeMessages(SHOW_HIDE_CONTROL);
+            handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
+
+
         } else if (v == ivShera) {
             // Handle clicks for ivShera
         } else if (v == ibBack) {
@@ -353,6 +420,19 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             } else {
                 setVideoType(FULL_SCREEN);
             }
+        }
+    }
+
+    //设置是否静音
+    private void volumeStart(boolean isMute) {
+        if (isMute) {
+            //静音
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+            sbVolumeControl.setProgress(0);
+        } else {
+            //非静音
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
+            sbVolumeControl.setProgress(currentVolume);
         }
     }
 
@@ -585,6 +665,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         ibSwitchcontrol.setOnClickListener(this);
         ibNext.setOnClickListener(this);
         ibFullscreen.setOnClickListener(this);
+
+
     }
 
     @Override
