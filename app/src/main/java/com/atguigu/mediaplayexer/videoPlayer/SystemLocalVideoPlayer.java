@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
@@ -16,13 +18,43 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.atguigu.mediaplayexer.R;
+import com.atguigu.mediaplayexer.utils.Utils;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SystemLocalVideoPlayer extends AppCompatActivity implements View.OnClickListener {
 
+    private static final int PROGRESS = 1;
+    private Utils utils;
+
+
+    private Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case PROGRESS:
+                    //的到前的进度
+                    int currentPosition = vv_player.getCurrentPosition();
+                    //设置到seekBar
+                    sbVideoPragressControl.setProgress(currentPosition);
+                    //设置到跟进时间
+                    tvVideoTime.setText(utils.stringForTime(currentPosition));
+                    //不断更新进度
+                    handler.sendEmptyMessageDelayed(PROGRESS, 0);
+                    //得到系统时间
+                    tvSystemTime.setText(getSystemTime());
+
+
+                    break;
+            }
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        utils = new Utils();
         //初始化所有控件
         findViews();
         //设置监听
@@ -37,7 +69,15 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             @Override
             public void onPrepared(MediaPlayer mp) {
                 vv_player.start();
-                //设置
+                //的到播放视频的时长
+                int duration = vv_player.getDuration();
+                //设置视频的时长
+                tvVideoTotaltime.setText(utils.stringForTime(duration));
+                //把视频的总时长设置为seekBar的总长度
+                sbVideoPragressControl.setMax(duration);
+                //发送消息
+                handler.sendEmptyMessage(PROGRESS);
+
 
             }
         });
@@ -147,4 +187,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     }
 
 
+    public String getSystemTime() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        return dateFormat.format(new Date());
+
+    }
 }
