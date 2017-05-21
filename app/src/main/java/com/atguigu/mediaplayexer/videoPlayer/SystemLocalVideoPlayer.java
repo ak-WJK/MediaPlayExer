@@ -190,6 +190,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         ibFullscreen.setOnClickListener(this);
     }
 
+
     /**
      * Handle button click events<br />
      * <br />
@@ -203,15 +204,28 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         } else if (v == ivShera) {
             // Handle clicks for ivShera
         } else if (v == ibBack) {
-            // Handle clicks for ibBack
+            finish();
         } else if (v == ibPre) {
             // Handle clicks for ibPre
         } else if (v == ibSwitchcontrol) {
-            // Handle clicks for ibSwitchcontrol
+            setPlayerAndPause();
+
+
         } else if (v == ibNext) {
             // Handle clicks for ibNext
         } else if (v == ibFullscreen) {
             // Handle clicks for ibFullscreen
+        }
+    }
+
+//设置播放和暂停
+    private void setPlayerAndPause() {
+        if (vv_player.isPlaying()) {
+            vv_player.pause();
+            ibSwitchcontrol.setBackgroundResource(R.drawable.media_switchcontrol2_select);
+        } else {
+            vv_player.start();
+            ibSwitchcontrol.setBackgroundResource(R.drawable.media_switchcontrol1_select);
         }
     }
 
@@ -222,6 +236,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
     }
 
+
+    //得到电量改变
     public void getBattery() {
 
         BatteryReceiver receiver = new BatteryReceiver();
@@ -259,7 +275,6 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             } else {
                 ivBattery.setImageResource(R.drawable.ic_battery_100);
             }
-
 
         }
 
