@@ -136,6 +136,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             public boolean onSingleTapConfirmed(MotionEvent e) {
                 return super.onSingleTapConfirmed(e);
             }
+
+
         });
 
 
