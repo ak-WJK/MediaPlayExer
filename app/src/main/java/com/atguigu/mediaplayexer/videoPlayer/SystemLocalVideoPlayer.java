@@ -12,6 +12,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -56,6 +58,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private Utils utils;
 
 
+    private GestureDetector detector;
+
+
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -87,6 +92,10 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         utils = new Utils();
         //初始化所有控件
         findViews();
+
+        //实现手势识别器
+        setGestureDetector();
+
         //得到播放列表
         getmDatas();
 
@@ -104,6 +113,40 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
     }
 
+    private void setGestureDetector() {
+        detector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+
+                setPlayerAndPause();
+
+                super.onLongPress(e);
+
+
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+
+                return super.onDoubleTap(e);
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                return super.onSingleTapConfirmed(e);
+            }
+        });
+
+
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        //将事件传入手势识别器
+        detector.onTouchEvent(event);
+        return super.onTouchEvent(event);
+    }
 
     private void setListener() {
         //设置播放的三个监听事件
