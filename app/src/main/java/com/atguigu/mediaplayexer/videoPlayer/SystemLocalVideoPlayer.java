@@ -175,20 +175,20 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     //设置自动播放下一个视频
     private void setplayerNext() {
 
-        if (mDatas != null && mDatas.size() > 0) {
-            position++;
-            if (position < mDatas.size()) {
-                LocalVideoBean videoBean = mDatas.get(position);
-                //得到并设置视频名称
-                tvVideoName.setText(videoBean.getVideoName());
-                //得到并设置播放地址
-                vv_player.setVideoPath(videoBean.getVideoAddress());
-
-            } else {
-                finish();
-            }
+        position++;
+        if (position < mDatas.size()) {
+            LocalVideoBean videoBean = mDatas.get(position);
+            //得到并设置视频名称
+            tvVideoName.setText(videoBean.getVideoName());
+            //得到并设置播放地址
+            vv_player.setVideoPath(videoBean.getVideoAddress());
 
 
+            //设置点击按钮状态
+            setButtonStatus();
+
+        } else {
+            finish();
         }
 
 
@@ -210,15 +210,54 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         } else if (v == ibBack) {
             finish();
         } else if (v == ibPre) {
-            // Handle clicks for ibPre
+            setPlayerPre();
         } else if (v == ibSwitchcontrol) {
 
             setPlayerAndPause();
 
         } else if (v == ibNext) {
-            // Handle clicks for ibNext
+            setplayerNext();
         } else if (v == ibFullscreen) {
             // Handle clicks for ibFullscreen
+        }
+    }
+
+    private void setPlayerPre() {
+        position--;
+        if (position > 0) {
+
+            LocalVideoBean videoBean = mDatas.get(position);
+            //得到并设置视频名称
+            tvVideoName.setText(videoBean.getVideoName());
+            //得到并设置播放地址
+            vv_player.setVideoPath(videoBean.getVideoAddress());
+            //设置按钮的点击状态
+            setButtonStatus();
+
+        } else {
+            finish();
+        }
+
+
+    }
+
+    private void setButtonStatus() {
+
+        if (mDatas != null && mDatas.size() > 0) {
+
+            setEnable(true);
+
+            if (position == 0) {
+                ibPre.setBackgroundResource(R.drawable.btn_pre_gray);
+                ibPre.setEnabled(false);
+            }
+            if (position == mDatas.size() - 1) {
+                ibPre.setBackgroundResource(R.drawable.btn_next_gray);
+                ibNext.setEnabled(false);
+            }
+
+        } else if (uri != null) {
+            setEnable(false);
         }
     }
 
@@ -266,6 +305,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
         }
 
+        //设置点击按钮状态
+        setButtonStatus();
 
     }
 
@@ -281,6 +322,23 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         Log.e("TAG", "mData " + mDatas.size());
         Log.e("TAG", "position " + position);
 
+
+    }
+
+    //通用设置按钮状态
+    public void setEnable(boolean b) {
+        if (b) {
+            ibPre.setBackgroundResource(R.drawable.media_pre_control_select);
+            ibNext.setBackgroundResource(R.drawable.media_next_control_select);
+
+        } else {
+            ibPre.setBackgroundResource(R.drawable.btn_pre_gray);
+            ibNext.setBackgroundResource(R.drawable.btn_next_gray);
+
+        }
+
+        ibPre.setEnabled(b);
+        ibNext.setEnabled(b);
 
     }
 
