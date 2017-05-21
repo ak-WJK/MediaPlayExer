@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -21,11 +22,11 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import com.atguigu.mediaplayexer.R;
 import com.atguigu.mediaplayexer.domain.LocalVideoBean;
 import com.atguigu.mediaplayexer.utils.Utils;
+import com.atguigu.mediaplayexer.view.VideoView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ import java.util.Date;
 public class SystemLocalVideoPlayer extends AppCompatActivity implements View.OnClickListener {
 
     private static final int SHOW_HIDE_CONTROL = 2;
+    private static final int DEFUALT_SCREEN = 3;
+    private static final int FULL_SCREEN = 4;
     private RelativeLayout rl_layout;
     private VideoView vv_player;
     private RelativeLayout llVideoInfo;
@@ -93,6 +96,10 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private int position;
     private Uri uri;
     private BatteryReceiver receiver;
+    private int screenHeight;
+    private int screenWidth;
+    private int videoHeight;
+    private int videoWidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +128,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
     }
 
+    private boolean isFullScreen = false;
+
     private void setGestureDetector() {
         detector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
@@ -136,6 +145,14 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
+                //得到屏幕的宽和高
+                getScreenWidthAndHeight();
+
+                if (isFullScreen) {
+                    setVideoType(DEFUALT_SCREEN);
+                } else {
+                    setVideoType(FULL_SCREEN);
+                }
 
                 return super.onDoubleTap(e);
             }
@@ -159,6 +176,17 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         });
 
 
+        //得到屏幕的宽和高
+        getScreenWidthAndHeight();
+
+
+    }
+
+    private void getScreenWidthAndHeight() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        screenHeight = metrics.heightPixels;
+        screenWidth = metrics.widthPixels;
     }
 
     private boolean isShow;
@@ -187,6 +215,12 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         vv_player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+
+                //得到视频的宽和高
+                videoHeight = mp.getVideoHeight();
+                videoWidth = mp.getVideoWidth();
+
+
                 vv_player.start();
                 //的到播放视频的时长
                 int duration = vv_player.getDuration();
@@ -200,6 +234,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                 handler.removeMessages(SHOW_HIDE_CONTROL);
                 handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
 
+                //设置默认为视频本身大小
+                setVideoType(DEFUALT_SCREEN);
             }
         });
 
@@ -310,7 +346,13 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
 
         } else if (v == ibFullscreen) {
-            // Handle clicks for ibFullscreen
+            //得到屏幕的宽和高
+            getScreenWidthAndHeight();
+            if (isFullScreen) {
+                setVideoType(DEFUALT_SCREEN);
+            } else {
+                setVideoType(FULL_SCREEN);
+            }
         }
     }
 
@@ -431,6 +473,46 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
         ibPre.setEnabled(b);
         ibNext.setEnabled(b);
+
+    }
+
+    //设置是否全屏显示
+    public void setVideoType(int videoType) {
+        switch (videoType) {
+            case FULL_SCREEN:
+                isFullScreen = true;
+                ibFullscreen.setBackgroundResource(R.drawable.media_fullscreen2_control_select);
+
+                //设置视频为全屏
+                vv_player.setVideoSize(screenWidth, screenHeight);
+
+                break;
+            case DEFUALT_SCREEN:
+                isFullScreen = false;
+                ibFullscreen.setBackgroundResource(R.drawable.media_fullscreen_control_select);
+
+                //视频原生的宽和高
+                int mVideoWidth = videoWidth;
+                int mVideoHeight = videoHeight;
+
+                //计算好的要显示的视频的宽和高
+                int width = screenWidth;
+                int height = screenHeight;
+
+                // for compatibility, we adjust size based on aspect ratio
+                if (mVideoWidth * height < width * mVideoHeight) {
+                    //Log.i("@@@", "image too wide, correcting");
+                    width = height * mVideoWidth / mVideoHeight;
+                } else if (mVideoWidth * height > width * mVideoHeight) {
+                    //Log.i("@@@", "image too tall, correcting");
+                    height = width * mVideoHeight / mVideoWidth;
+                }
+                vv_player.setVideoSize(width, height);
+
+
+                break;
+        }
+
 
     }
 
