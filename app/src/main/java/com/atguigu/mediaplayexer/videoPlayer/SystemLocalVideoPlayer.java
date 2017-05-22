@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -259,6 +260,30 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
 
         return super.onTouchEvent(event);
+    }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            currentVolume--;
+            updateVolume(currentVolume);
+
+            handler.removeMessages(SHOW_HIDE_CONTROL);
+            handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+
+            currentVolume++;
+            updateVolume(currentVolume);
+
+
+            handler.removeMessages(SHOW_HIDE_CONTROL);
+            handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
+            return true;
+
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     private void setListener() {
