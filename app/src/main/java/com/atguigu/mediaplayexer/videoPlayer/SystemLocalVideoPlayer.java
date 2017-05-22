@@ -58,6 +58,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private ImageButton ibSwitchcontrol;
     private ImageButton ibNext;
     private ImageButton ibFullscreen;
+    private LinearLayout ll_loading;
+    private LinearLayout ll_buffering;
 
 
     private static final int PROGRESS = 1;
@@ -66,6 +68,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
     private GestureDetector detector;
 
+    private int preCurrrentPosition;
 
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -91,6 +94,17 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                         sbVideoPragressControl.setSecondaryProgress(secondaryProgress);
                     } else {
                         sbVideoPragressControl.setSecondaryProgress(0);
+                    }
+
+                    //监听视频卡顿
+                    if (isNetUri && vv_player.isPlaying()) {
+                        int duration = currentPosition - preCurrrentPosition;
+                        if (duration < 500) {
+                            ll_buffering.setVisibility(View.GONE);
+                        } else {
+                            ll_buffering.setVisibility(View.VISIBLE);
+                        }
+                        preCurrrentPosition = currentPosition;
                     }
 
 
@@ -433,6 +447,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
             isNetUri = utils.isNetUri(videoBean.getVideoAddress());
 
+
+            ll_loading.setVisibility(View.VISIBLE);
+
             //设置点击按钮状态
             setButtonStatus();
 
@@ -518,6 +535,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             vv_player.setVideoPath(videoBean.getVideoAddress());
 
             isNetUri = utils.isNetUri(videoBean.getVideoAddress());
+
+            ll_loading.setVisibility(View.VISIBLE);
 
             //设置按钮的点击状态
             setButtonStatus();
@@ -717,7 +736,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
      * (http://www.buzzingandroid.com/tools/android-layout-finder)
      */
     private void findViews() {
+
         setContentView(R.layout.activity_system_local_video_player);
+
         rl_layout = (RelativeLayout) findViewById(R.id.rl_layout);
         vv_player = (VideoView) findViewById(R.id.vv_player);
         llVideoInfo = (RelativeLayout) findViewById(R.id.ll_video_info);
@@ -738,6 +759,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         ibSwitchcontrol = (ImageButton) findViewById(R.id.ib_switchcontrol);
         ibNext = (ImageButton) findViewById(R.id.ib_next);
         ibFullscreen = (ImageButton) findViewById(R.id.ib_fullscreen);
+        ll_loading = (LinearLayout) findViewById(R.id.ll_loading);
+        ll_buffering = (LinearLayout) findViewById(R.id.ll_buffering);
+
 
         ibVolune.setOnClickListener(this);
         ivShera.setOnClickListener(this);
@@ -746,7 +770,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         ibSwitchcontrol.setOnClickListener(this);
         ibNext.setOnClickListener(this);
         ibFullscreen.setOnClickListener(this);
-
+        //设置为隐藏
+        ll_loading.setVisibility(View.GONE);
 
     }
 
