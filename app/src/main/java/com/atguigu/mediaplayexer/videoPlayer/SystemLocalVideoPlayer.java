@@ -104,6 +104,10 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private AudioManager am;
     private int currentVolume;
     private int maxVolume;
+    private int volume;
+    private int min;
+    private float downY;
+    private float moveY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,6 +229,35 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     public boolean onTouchEvent(MotionEvent event) {
         //将事件传入手势识别器
         detector.onTouchEvent(event);
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                downY = event.getY();
+                volume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+                min = Math.min(screenWidth, screenHeight);
+
+                handler.removeMessages(SHOW_HIDE_CONTROL);
+
+                break;
+            case MotionEvent.ACTION_MOVE:
+
+                moveY = event.getY();
+                float distanceY = downY - moveY;
+
+                float delta = (distanceY / min) * maxVolume;
+                if (delta != 0) {
+                    float mVolume = Math.min(Math.max(delta + volume, 0), maxVolume);
+
+                    updateVolume((int) mVolume);
+                }
+
+
+                break;
+            case MotionEvent.ACTION_UP:
+                handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
+                break;
+        }
+
+
         return super.onTouchEvent(event);
     }
 
@@ -517,6 +550,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         } else if (uri != null) {
             vv_player.setVideoURI(uri);
 
+
         }
 
         //设置点击按钮状态
@@ -672,7 +706,11 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(receiver);
+        if (receiver != null) {
+
+            unregisterReceiver(receiver);
+            receiver = null;
+        }
         handler.removeCallbacksAndMessages(null);
     }
 }
