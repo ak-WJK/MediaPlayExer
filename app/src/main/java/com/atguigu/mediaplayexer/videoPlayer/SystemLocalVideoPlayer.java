@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -83,6 +82,17 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                     //得到系统时间
                     tvSystemTime.setText(getSystemTime());
 
+                    //设置视频缓存
+                    if (isNetUri) {
+
+                        int bufferPercentage = vv_player.getBufferPercentage();
+                        int totalBuffer = bufferPercentage * sbVideoPragressControl.getMax();
+                        int secondaryProgress = totalBuffer / 100;
+                        sbVideoPragressControl.setSecondaryProgress(secondaryProgress);
+                    } else {
+                        sbVideoPragressControl.setSecondaryProgress(0);
+                    }
+
 
                     break;
                 case SHOW_HIDE_CONTROL:
@@ -109,6 +119,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private int min;
     private float downY;
     private float moveY;
+
+    private boolean isNetUri = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -419,6 +431,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             //得到并设置播放地址
             vv_player.setVideoPath(videoBean.getVideoAddress());
 
+            isNetUri = utils.isNetUri(videoBean.getVideoAddress());
 
             //设置点击按钮状态
             setButtonStatus();
@@ -503,6 +516,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             tvVideoName.setText(videoBean.getVideoName());
             //得到并设置播放地址
             vv_player.setVideoPath(videoBean.getVideoAddress());
+
+            isNetUri = utils.isNetUri(videoBean.getVideoAddress());
+
             //设置按钮的点击状态
             setButtonStatus();
 
@@ -572,9 +588,15 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             //得到播放地址
             vv_player.setVideoPath(videoBean.getVideoAddress());
             tvVideoName.setText(videoBean.getVideoName());
+
+            //判断是否是网络资源
+            isNetUri = utils.isNetUri(videoBean.getVideoAddress());
+
         } else if (uri != null) {
             vv_player.setVideoURI(uri);
-
+            tvVideoName.setText(uri.toString());
+            //判断是否是网络资源
+            isNetUri = utils.isNetUri(uri.toString());
 
         }
 
@@ -592,8 +614,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         mDatas = (ArrayList<LocalVideoBean>) getIntent().getSerializableExtra("mDatas");
         position = getIntent().getIntExtra("position", 0);
 
-        Log.e("TAG", "mData " + mDatas.size());
-        Log.e("TAG", "position " + position);
+//        Log.e("TAG", "mData " + mDatas.size());
+//        Log.e("TAG", "position " + position);
 
 
     }
