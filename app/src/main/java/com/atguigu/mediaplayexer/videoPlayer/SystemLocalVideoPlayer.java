@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -38,6 +39,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private static final int SHOW_HIDE_CONTROL = 2;
     private static final int DEFUALT_SCREEN = 3;
     private static final int FULL_SCREEN = 4;
+    private static final int SHOW_NET_SPEED = 5;
     private RelativeLayout rl_layout;
     private VideoView vv_player;
     private RelativeLayout llVideoInfo;
@@ -61,6 +63,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private LinearLayout ll_loading;
     private LinearLayout ll_buffering;
 
+    private TextView tv_loading_net_speed;
+    private TextView tv_net_speed;
 
     private static final int PROGRESS = 1;
     private Utils utils;
@@ -73,6 +77,22 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case SHOW_NET_SPEED:
+
+                    if (isNetUri) {
+                        String netSpeed = utils.getNetSpeed(SystemLocalVideoPlayer.this);
+                        tv_loading_net_speed.setText("正在加载中...." + netSpeed);
+
+                        tv_net_speed.setText("正在缓冲...." + netSpeed);
+
+                        Log.e("TAG", "netSpeed" + netSpeed);
+
+                        //一定要隔一段时间在发送消息
+                        sendEmptyMessageDelayed(SHOW_NET_SPEED, 1000);
+                    }
+
+
+                    break;
                 case PROGRESS:
                     //的到前的进度
                     int currentPosition = vv_player.getCurrentPosition();
@@ -335,6 +355,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
                 handler.removeMessages(SHOW_HIDE_CONTROL);
                 handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
+
+                //设置为隐藏
+                ll_loading.setVisibility(View.GONE);
 
                 //设置默认为视频本身大小
                 setVideoType(DEFUALT_SCREEN);
@@ -761,7 +784,8 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         ibFullscreen = (ImageButton) findViewById(R.id.ib_fullscreen);
         ll_loading = (LinearLayout) findViewById(R.id.ll_loading);
         ll_buffering = (LinearLayout) findViewById(R.id.ll_buffering);
-
+        tv_loading_net_speed = (TextView) findViewById(R.id.tv_loading_net_speed);
+        tv_net_speed = (TextView) findViewById(R.id.tv_net_speed);
 
         ibVolune.setOnClickListener(this);
         ivShera.setOnClickListener(this);
@@ -770,8 +794,9 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         ibSwitchcontrol.setOnClickListener(this);
         ibNext.setOnClickListener(this);
         ibFullscreen.setOnClickListener(this);
-        //设置为隐藏
-        ll_loading.setVisibility(View.GONE);
+
+//发送得到网速的消息
+        handler.sendEmptyMessage(SHOW_NET_SPEED);
 
     }
 
