@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -13,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -27,20 +27,23 @@ import android.widget.TextView;
 import com.atguigu.mediaplayexer.R;
 import com.atguigu.mediaplayexer.domain.LocalVideoBean;
 import com.atguigu.mediaplayexer.utils.Utils;
-import com.atguigu.mediaplayexer.view.VideoView;
+import com.atguigu.mediaplayexer.view.VitamioVideoView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class SystemLocalVideoPlayer extends AppCompatActivity implements View.OnClickListener {
+import io.vov.vitamio.MediaPlayer;
+import io.vov.vitamio.Vitamio;
+
+public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.OnClickListener {
 
     private static final int SHOW_HIDE_CONTROL = 2;
     private static final int DEFUALT_SCREEN = 3;
     private static final int FULL_SCREEN = 4;
     private static final int SHOW_NET_SPEED = 5;
     private RelativeLayout rl_layout;
-    private VideoView vv_player;
+    private VitamioVideoView vv_player;
     private RelativeLayout llVideoInfo;
     private TextView tvVideoName;
     private ImageView ivBattery;
@@ -79,12 +82,14 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                 case SHOW_NET_SPEED:
 
                     if (isNetUri) {
-                        String netSpeed = utils.getNetSpeed(SystemLocalVideoPlayer.this);
+                        String netSpeed = utils.getNetSpeed(VitamioLocalVideoPlayer.this);
                         tv_loading_net_speed.setText("正在加载中...." + netSpeed);
 
                         tv_net_speed.setText("正在缓冲...." + netSpeed);
 
-//                        Log.e("TAG", "netSpeed" + netSpeed);
+                        Log.e("TAG", "netSpeed" + netSpeed);
+
+                        Log.e("TAG", "这是万能博泛起");
 
                         //一定要隔一段时间在发送消息
                         sendEmptyMessageDelayed(SHOW_NET_SPEED, 1000);
@@ -94,7 +99,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                     break;
                 case PROGRESS:
                     //的到前的进度
-                    int currentPosition = vv_player.getCurrentPosition();
+                    int currentPosition = (int) vv_player.getCurrentPosition();
                     //设置到seekBar
                     sbVideoPragressControl.setProgress(currentPosition);
                     //设置到跟进时间
@@ -159,6 +164,10 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         utils = new Utils();
+
+        //初始化解码器
+        Vitamio.isInitialized(getApplicationContext());
+
         //初始化所有控件
         findViews();
 
@@ -337,7 +346,6 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             @Override
             public void onPrepared(MediaPlayer mp) {
 
-
                 //得到视频的宽和高
                 videoHeight = mp.getVideoHeight();
                 videoWidth = mp.getVideoWidth();
@@ -345,7 +353,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
                 vv_player.start();
                 //的到播放视频的时长
-                int duration = vv_player.getDuration();
+                int duration = (int) vv_player.getDuration();
                 //设置视频的时长
                 tvVideoTotaltime.setText(utils.stringForTime(duration));
                 //把视频的总时长设置为seekBar的总长度
@@ -377,7 +385,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 //播放出错跳转到万能播放器
-                startVitamioPlayer();
+
 
                 return false;
             }
@@ -438,25 +446,6 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
             }
         });
-
-
-    }
-
-    private void startVitamioPlayer() {
-        if (vv_player != null) {
-            vv_player.stopPlayback();
-        }
-        Intent intent = new Intent(this, VitamioLocalVideoPlayer.class);
-        if (mDatas != null && mDatas.size() > 0) {
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("mDatas", mDatas);
-            intent.putExtras(bundle);
-            intent.putExtra("position", position);
-        } else if (uri != null) {
-            intent.setData(uri);
-        }
-        startActivity(intent);
-        finish();//关闭系统播放器
 
 
     }
@@ -782,10 +771,10 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
      */
     private void findViews() {
 
-        setContentView(R.layout.activity_system_local_video_player);
+        setContentView(R.layout.activity_vitamio_local_video_player);
 
         rl_layout = (RelativeLayout) findViewById(R.id.rl_layout);
-        vv_player = (VideoView) findViewById(R.id.vv_player);
+        vv_player = (VitamioVideoView) findViewById(R.id.vv_player);
         llVideoInfo = (RelativeLayout) findViewById(R.id.ll_video_info);
         tvVideoName = (TextView) findViewById(R.id.tv_video_name);
         ivBattery = (ImageView) findViewById(R.id.iv_battery);
@@ -818,7 +807,11 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         ibFullscreen.setOnClickListener(this);
 
 //发送得到网速的消息
+
         handler.sendEmptyMessage(SHOW_NET_SPEED);
+
+
+
 
     }
 
