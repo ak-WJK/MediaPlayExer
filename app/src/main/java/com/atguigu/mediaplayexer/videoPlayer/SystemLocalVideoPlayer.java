@@ -15,7 +15,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -455,7 +454,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             Bundle bundle = new Bundle();
             bundle.putSerializable("mDatas", mDatas);
 
-            Log.e("TAG", "SystemLocalVideoPlayer + putBundle " + mDatas.size());
+//            Log.e("TAG", "SystemLocalVideoPlayer + putBundle " + mDatas.size());
 
             intent.putExtras(bundle);
             intent.putExtra("position", position);
