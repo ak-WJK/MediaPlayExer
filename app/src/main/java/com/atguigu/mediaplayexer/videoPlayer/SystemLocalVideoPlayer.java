@@ -1,7 +1,9 @@
 package com.atguigu.mediaplayexer.videoPlayer;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -13,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -356,6 +359,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                 handler.removeMessages(SHOW_HIDE_CONTROL);
                 handler.sendEmptyMessageDelayed(SHOW_HIDE_CONTROL, 3000);
 
+
                 //设置为隐藏
                 ll_loading.setVisibility(View.GONE);
 
@@ -446,10 +450,13 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         if (vv_player != null) {
             vv_player.stopPlayback();
         }
-        Intent intent = new Intent(this, VitamioLocalVideoPlayer.class);
+        Intent intent = new Intent(SystemLocalVideoPlayer.this, VitamioLocalVideoPlayer.class);
         if (mDatas != null && mDatas.size() > 0) {
             Bundle bundle = new Bundle();
             bundle.putSerializable("mDatas", mDatas);
+
+            Log.e("TAG", "SystemLocalVideoPlayer + putBundle " + mDatas.size());
+
             intent.putExtras(bundle);
             intent.putExtra("position", position);
         } else if (uri != null) {
@@ -524,7 +531,10 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
 
         } else if (v == ivShera) {
-            // Handle clicks for ivShera
+
+            switchPlayer();
+
+
         } else if (v == ibBack) {
             finish();
         } else if (v == ibPre) {
@@ -554,6 +564,20 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                 setVideoType(FULL_SCREEN);
             }
         }
+    }
+
+    private void switchPlayer() {
+        new AlertDialog.Builder(this)
+                .setTitle("提示")
+                .setMessage("当前是系统播放器，是否要切换万能播放器播放")
+                .setPositiveButton("切换", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startVitamioPlayer();
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
     }
 
     //设置是否静音

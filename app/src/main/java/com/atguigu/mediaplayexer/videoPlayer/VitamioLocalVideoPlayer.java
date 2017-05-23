@@ -160,7 +160,7 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
     private float downY;
     private float moveY;
 
-    private boolean isNetUri = true;
+    private boolean isNetUri = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -187,12 +187,11 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
         //得到播放列表
         getmDatas();
 
+        //设置播放列表
+        setmDatas();
 
         //设置监听
         setListener();
-
-        //设置播放列表
-        setmDatas();
 
 
         //得到电量
@@ -353,7 +352,6 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
                 videoWidth = mp.getVideoWidth();
 
 
-                vv_player.start();
                 //的到播放视频的时长
                 int duration = (int) vv_player.getDuration();
                 //设置视频的时长
@@ -361,6 +359,7 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
                 //把视频的总时长设置为seekBar的总长度
                 sbVideoPragressControl.setMax(duration);
                 //发送消息
+                vv_player.start();
                 handler.sendEmptyMessage(PROGRESS);
 
                 handler.removeMessages(SHOW_HIDE_CONTROL);
@@ -533,6 +532,8 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
 
         } else if (v == ivShera) {
             // Handle clicks for ivShera
+            switchPlayer();
+
         } else if (v == ibBack) {
             finish();
         } else if (v == ibPre) {
@@ -564,7 +565,45 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
         }
     }
 
+
+    private void switchPlayer() {
+        new AlertDialog.Builder(this)
+                .setTitle("提示")
+                .setMessage("当前是万能播放器，是否要切换到系统播放器播放")
+                .setPositiveButton("切换", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startSystemPlayer();
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+
+    }
+
+
     //设置是否静音
+
+    private void startSystemPlayer() {
+
+        if (vv_player != null) {
+            vv_player.stopPlayback();
+        }
+        Intent intent = new Intent(VitamioLocalVideoPlayer.this, SystemLocalVideoPlayer.class);
+        if (mDatas != null && mDatas.size() > 0) {
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("mDatas", mDatas);
+            intent.putExtras(bundle);
+            intent.putExtra("position", position);
+        } else if (uri != null) {
+            intent.setData(uri);
+        }
+        startActivity(intent);
+        finish();//关闭系统播放器
+
+
+    }
+
     private void volumeStart(boolean isMute) {
         if (isMute) {
             //静音
@@ -657,6 +696,9 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
 
             LocalVideoBean videoBean = mDatas.get(position);
 
+//            Log.e("TAG", "VitamioLocalVideoPlayer setmDatas " + mDatas.size());
+//            Log.e("TAG", "VitamioLocalVideoPlayer setmDatas position " + position);
+
             //得到播放地址
             vv_player.setVideoPath(videoBean.getVideoAddress());
             tvVideoName.setText(videoBean.getVideoName());
@@ -686,8 +728,8 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
         mDatas = (ArrayList<LocalVideoBean>) getIntent().getSerializableExtra("mDatas");
         position = getIntent().getIntExtra("position", 0);
 
-//        Log.e("TAG", "mData " + mDatas.size());
-//        Log.e("TAG", "position " + position);
+//        Log.e("TAG", "VitamioLocalVideoPlayer getmDatas " + mDatas.size());
+//        Log.e("TAG", "VitamioLocalVideoPlayer getmDatas position " + position);
 
 
     }
