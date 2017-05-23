@@ -1,7 +1,9 @@
 package com.atguigu.mediaplayexer.videoPlayer;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -384,7 +386,8 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
         vv_player.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
-                //播放出错跳转到万能播放器
+                //播放出错示
+                showErrorDialog();
 
 
                 return false;
@@ -446,6 +449,22 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
 
             }
         });
+
+
+    }
+
+    //万能播放器播放出错提示
+    private void showErrorDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("提示")
+                .setMessage("播放视频出错了")
+                .setPositiveButton("退出播放", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                })
+                .show();
 
 
     }
@@ -809,8 +828,6 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
 //发送得到网速的消息
 
         handler.sendEmptyMessage(SHOW_NET_SPEED);
-
-
 
 
     }
