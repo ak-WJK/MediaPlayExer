@@ -1,7 +1,7 @@
 package com.atguigu.mediaplayexer.fragment;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -11,14 +11,19 @@ import android.widget.TextView;
 import com.atguigu.mediaplayexer.BaseFragment;
 import com.atguigu.mediaplayexer.R;
 import com.atguigu.mediaplayexer.adapter.NetVideoAdapter;
+import com.atguigu.mediaplayexer.domain.LocalVideoBean;
 import com.atguigu.mediaplayexer.domain.MoveInfo;
 import com.atguigu.mediaplayexer.videoPlayer.SystemLocalVideoPlayer;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xutils.common.Callback;
 import org.xutils.http.RequestParams;
 import org.xutils.x;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +35,7 @@ public class NetVideoFragment extends BaseFragment {
     private ListView lv;
     private TextView tv_nodata;
     private NetVideoAdapter adapter;
+    private ArrayList<LocalVideoBean> mDatas;
 
     @Override
     public View initView() {
@@ -43,9 +49,19 @@ public class NetVideoFragment extends BaseFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MoveInfo.TrailersBean item = adapter.getItem(position);
 
-                Intent intent = new Intent(context, SystemLocalVideoPlayer.class);
-                intent.setDataAndType(Uri.parse(item.getUrl()), "video/*");
-                startActivity(intent);
+//                Intent intent = new Intent(context, SystemLocalVideoPlayer.class);
+//                intent.setDataAndType(Uri.parse(item.getUrl()), "video/*");
+//                startActivity(intent);
+
+                if (mDatas != null && mDatas.size() > 0) {
+
+                    Intent intent = new Intent(context, SystemLocalVideoPlayer.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("mDatas", mDatas);
+                    intent.putExtras(bundle);
+                    intent.putExtra("position", position);
+                    startActivity(intent);
+                }
 
             }
         });
@@ -66,6 +82,12 @@ public class NetVideoFragment extends BaseFragment {
             public void onSuccess(String result) {
                 Log.e("TAG", "result" + result);
                 processData(result);
+                //手动解析数据传递列表实现点击播放上一个下一个
+                try {
+                    analysisJson(result);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
 
             }
@@ -85,6 +107,33 @@ public class NetVideoFragment extends BaseFragment {
 
             }
         });
+
+
+    }
+
+    //手动解析数据
+    private void analysisJson(String result) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(result);
+
+        mDatas = new ArrayList<>();
+
+        JSONArray trailers = jsonObject.optJSONArray("trailers");
+        if (trailers != null && trailers.length() > 0) {
+            for (int i = 0; i < trailers.length(); i++) {
+                JSONObject object = (JSONObject) trailers.get(i);
+
+                String movieName = object.optString("movieName");
+                String url = object.optString("url");
+                String coverImg = object.optString("coverImg");
+                long videoLength = object.optLong("videoLength");
+
+                mDatas.add(new LocalVideoBean(movieName, videoLength, videoLength, url));
+
+
+            }
+
+        }
 
 
     }

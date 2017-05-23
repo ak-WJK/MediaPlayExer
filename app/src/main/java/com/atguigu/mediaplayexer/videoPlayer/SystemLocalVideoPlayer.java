@@ -364,6 +364,18 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
 
                 //设置默认为视频本身大小
                 setVideoType(DEFUALT_SCREEN);
+
+                if(vv_player.isPlaying()) {
+                    ibSwitchcontrol.setBackgroundResource(R.drawable.media_switchcontrol1_select);
+                }else{
+                    ibSwitchcontrol.setBackgroundResource(R.drawable.media_switchcontrol2_select);
+
+                }
+
+
+
+
+
             }
         });
 
