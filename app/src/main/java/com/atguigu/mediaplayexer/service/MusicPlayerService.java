@@ -85,6 +85,12 @@ public class MusicPlayerService extends Service {
         public void seekTo(int position) throws RemoteException {
 
         }
+
+        @Override
+        public boolean isPlayer() throws RemoteException {
+
+            return mediaPlayer.isPlaying();
+        }
     };
 
 
@@ -233,6 +239,14 @@ public class MusicPlayerService extends Service {
     public void seekTo(int position) {
 
     }
+
+//    /**
+//     * @return 是否播放
+//     */
+//    public boolean isPlayer() {
+//        return false;
+//    }
+//
 
     @Override
     public void onCreate() {

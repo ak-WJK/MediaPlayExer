@@ -67,7 +67,11 @@ interface IMusicPlayerService {
      */
     void seekTo(int position);
 
-
+/**
+     * @return
+     * 是否播放
+     */
+    boolean isPlayer() ;
 
 
 

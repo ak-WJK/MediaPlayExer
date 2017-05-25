@@ -74,7 +74,7 @@ public class SystemAudioPlayer extends AppCompatActivity implements View.OnClick
                 if (service != null) {
                     try {
                         service.openMusic(position);
-
+                        ibSwitchcontrol.setBackgroundResource(R.drawable.audio_switchcontrol2_select);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -129,6 +129,19 @@ public class SystemAudioPlayer extends AppCompatActivity implements View.OnClick
         } else if (v == ibPre) {
             // Handle clicks for ibPre
         } else if (v == ibSwitchcontrol) {
+            try {
+                if (service.isPlayer()) {
+                    service.pause();
+                    ibSwitchcontrol.setBackgroundResource(R.drawable.audio_switchcontrol1_select);
+                } else {
+                    service.start();
+                    ibSwitchcontrol.setBackgroundResource(R.drawable.audio_switchcontrol2_select);
+
+                }
+
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
 
 
             // Handle clicks for ibSwitchcontrol
