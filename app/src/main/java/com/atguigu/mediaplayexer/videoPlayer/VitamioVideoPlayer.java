@@ -38,7 +38,7 @@ import java.util.Date;
 import io.vov.vitamio.MediaPlayer;
 import io.vov.vitamio.Vitamio;
 
-public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.OnClickListener {
+public class VitamioVideoPlayer extends AppCompatActivity implements View.OnClickListener {
 
     private static final int SHOW_HIDE_CONTROL = 2;
     private static final int DEFUALT_SCREEN = 3;
@@ -84,7 +84,7 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
                 case SHOW_NET_SPEED:
 
                     if (isNetUri) {
-                        String netSpeed = utils.getNetSpeed(VitamioLocalVideoPlayer.this);
+                        String netSpeed = utils.getNetSpeed(VitamioVideoPlayer.this);
                         tv_loading_net_speed.setText("正在加载中...." + netSpeed);
 
                         tv_net_speed.setText("正在缓冲...." + netSpeed);
@@ -589,7 +589,7 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
         if (vv_player != null) {
             vv_player.stopPlayback();
         }
-        Intent intent = new Intent(VitamioLocalVideoPlayer.this, SystemLocalVideoPlayer.class);
+        Intent intent = new Intent(VitamioVideoPlayer.this, SystemVideoPlayer.class);
         if (mDatas != null && mDatas.size() > 0) {
             Bundle bundle = new Bundle();
             bundle.putSerializable("mDatas", mDatas);
@@ -696,8 +696,8 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
 
             LocalVideoBean videoBean = mDatas.get(position);
 
-//            Log.e("TAG", "VitamioLocalVideoPlayer setmDatas " + mDatas.size());
-//            Log.e("TAG", "VitamioLocalVideoPlayer setmDatas position " + position);
+//            Log.e("TAG", "VitamioVideoPlayer setmDatas " + mDatas.size());
+//            Log.e("TAG", "VitamioVideoPlayer setmDatas position " + position);
 
             //得到播放地址
             vv_player.setVideoPath(videoBean.getVideoAddress());
@@ -728,8 +728,8 @@ public class VitamioLocalVideoPlayer extends AppCompatActivity implements View.O
         mDatas = (ArrayList<LocalVideoBean>) getIntent().getSerializableExtra("mDatas");
         position = getIntent().getIntExtra("position", 0);
 
-//        Log.e("TAG", "VitamioLocalVideoPlayer getmDatas " + mDatas.size());
-//        Log.e("TAG", "VitamioLocalVideoPlayer getmDatas position " + position);
+//        Log.e("TAG", "VitamioVideoPlayer getmDatas " + mDatas.size());
+//        Log.e("TAG", "VitamioVideoPlayer getmDatas position " + position);
 
 
     }

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <RelativeLayout
+        android:id="@+id/ll_bottem_controls"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_above="@+id/ll_control_button">
+
+
+        <TextView
+            android:id="@+id/tv_audio_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:text="00:00/00:00"
+            android:textColor="#fff" />
+
+
+        <SeekBar
+            android:id="@+id/sb_audio_pragress_control"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_audio_time"
+            android:max="100"
+            android:maxHeight="5dp"
+            android:minHeight="5dp"
+            android:progress="20"
+            android:progressDrawable="@drawable/progress_horizontal2"
+            android:thumb="@drawable/seek_thumb" />
+
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:id="@+id/ll_control_button"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/ib_for"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/audio_for_control_select"
+            android:scaleType="fitXY" />
+
+        <ImageButton
+            android:id="@+id/ib_pre"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/audio_pre_control_select"
+            android:scaleType="fitXY" />
+
+        <ImageButton
+            android:id="@+id/ib_switchcontrol"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/audio_switchcontrol1_select"
+            android:scaleType="fitXY" />
+
+        <ImageButton
+            android:id="@+id/ib_next"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/audio_next_control_select"
+            android:scaleType="fitXY" />
+
+        <ImageButton
+            android:id="@+id/ib_geci"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/audio_geci_select"
+            android:scaleType="fitXY" />
+
+    </LinearLayout>
+
+</RelativeLayout>

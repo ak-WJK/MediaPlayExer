@@ -1,7 +1,9 @@
 package com.atguigu.mediaplayexer.videoPlayer;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,12 +15,14 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,7 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class SystemLocalVideoPlayer extends AppCompatActivity implements View.OnClickListener {
+public class SystemVideoPlayer extends AppCompatActivity implements View.OnClickListener {
 
     private static final int SHOW_HIDE_CONTROL = 2;
     private static final int DEFUALT_SCREEN = 3;
@@ -81,7 +85,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                 case SHOW_NET_SPEED:
 
                     if (isNetUri) {
-                        String netSpeed = utils.getNetSpeed(SystemLocalVideoPlayer.this);
+                        String netSpeed = utils.getNetSpeed(SystemVideoPlayer.this);
                         tv_loading_net_speed.setText("正在加载中...." + netSpeed);
 
                         tv_net_speed.setText("正在缓冲...." + netSpeed);
@@ -156,11 +160,18 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
     private float moveY;
 
     private boolean isNetUri = true;
+    private float downX;
+    private int brightness;
+    private float mBrigthness;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         utils = new Utils();
+        //获取屏幕亮度
+        brightness = getScreenBrightness(SystemVideoPlayer.this);
+
+
         //初始化所有控件
         findViews();
 
@@ -280,6 +291,7 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 downY = event.getY();
+                downX = event.getX();
                 volume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
                 min = Math.min(screenWidth, screenHeight);
 
@@ -291,11 +303,30 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                 moveY = event.getY();
                 float distanceY = downY - moveY;
 
-                float delta = (distanceY / min) * maxVolume;
-                if (delta != 0) {
-                    float mVolume = Math.min(Math.max(delta + volume, 0), maxVolume);
+                int max = Math.max(screenWidth, screenHeight);
+                if ((max / 2) < downX) {
+                    float delta = (distanceY / min) * maxVolume;
+                    if (delta != 0) {
+                        float mVolume = Math.min(Math.max(delta + volume, 0), maxVolume);
 
-                    updateVolume((int) mVolume);
+                        updateVolume((int) mVolume);
+                    }
+
+                }
+                if ((max / 2) > downX) {
+
+                    float delta = (distanceY / min) * 255;
+                    if (delta != 0) {
+                        mBrigthness = Math.min(Math.max(delta + brightness, 0), 255);
+
+                        setScreenBrightness(SystemVideoPlayer.this, (int) mBrigthness);
+
+                    }
+                    brightness = (int) mBrigthness;
+
+                    downY = moveY;
+
+
                 }
 
 
@@ -365,15 +396,12 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
                 //设置默认为视频本身大小
                 setVideoType(DEFUALT_SCREEN);
 
-                if(vv_player.isPlaying()) {
+                if (vv_player.isPlaying()) {
                     ibSwitchcontrol.setBackgroundResource(R.drawable.media_switchcontrol1_select);
-                }else{
+                } else {
                     ibSwitchcontrol.setBackgroundResource(R.drawable.media_switchcontrol2_select);
 
                 }
-
-
-
 
 
             }
@@ -454,19 +482,18 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             }
         });
 
-
     }
 
     private void startVitamioPlayer() {
         if (vv_player != null) {
             vv_player.stopPlayback();
         }
-        Intent intent = new Intent(SystemLocalVideoPlayer.this, VitamioLocalVideoPlayer.class);
+        Intent intent = new Intent(SystemVideoPlayer.this, VitamioVideoPlayer.class);
         if (mDatas != null && mDatas.size() > 0) {
             Bundle bundle = new Bundle();
             bundle.putSerializable("mDatas", mDatas);
 
-//            Log.e("TAG", "SystemLocalVideoPlayer + putBundle " + mDatas.size());
+//            Log.e("TAG", "SystemVideoPlayer + putBundle " + mDatas.size());
 
             intent.putExtras(bundle);
             intent.putExtra("position", position);
@@ -866,5 +893,27 @@ public class SystemLocalVideoPlayer extends AppCompatActivity implements View.On
             receiver = null;
         }
         handler.removeCallbacksAndMessages(null);
+    }
+
+
+    //   获取屏幕的亮度
+    public static int getScreenBrightness(Activity activity) {
+        int value = 0;
+        ContentResolver cr = activity.getContentResolver();
+        try {
+            value = Settings.System.getInt(cr, Settings.System.SCREEN_BRIGHTNESS);
+
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return value;
+    }
+
+    //    二、设置屏幕亮度：
+    public static void setScreenBrightness(Activity activity, int value) {
+        WindowManager.LayoutParams params = activity.getWindow().getAttributes();
+        params.screenBrightness = value / 255f;
+        activity.getWindow().setAttributes(params);
     }
 }

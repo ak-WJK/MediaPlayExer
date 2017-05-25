@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="没有找到视频,找到一捆妹纸!!!"
+        android:text="没有找到资源,找到一捆妹纸!!!"
         android:textColor="#000" />
 
 

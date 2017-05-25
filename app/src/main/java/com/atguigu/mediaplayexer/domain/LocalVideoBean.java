@@ -11,6 +11,23 @@ public class LocalVideoBean implements Serializable {
     private long size;
     private long duration;
     private String videoAddress;
+    private String artist;
+
+    public LocalVideoBean(String videoName, long size, long duration, String videoAddress, String artist) {
+        this.videoName = videoName;
+        this.size = size;
+        this.duration = duration;
+        this.videoAddress = videoAddress;
+        this.artist = artist;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
 
     public LocalVideoBean(String videoName, long size, long duration, String videoAddress) {
         this.videoName = videoName;
@@ -61,6 +78,7 @@ public class LocalVideoBean implements Serializable {
                 ", size=" + size +
                 ", duration=" + duration +
                 ", videoAddress='" + videoAddress + '\'' +
+                ", artist='" + artist + '\'' +
                 '}';
     }
 }

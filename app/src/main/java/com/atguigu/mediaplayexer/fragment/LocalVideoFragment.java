@@ -17,7 +17,7 @@ import com.atguigu.mediaplayexer.BaseFragment;
 import com.atguigu.mediaplayexer.R;
 import com.atguigu.mediaplayexer.adapter.LocalVideoAdapter;
 import com.atguigu.mediaplayexer.domain.LocalVideoBean;
-import com.atguigu.mediaplayexer.videoPlayer.SystemLocalVideoPlayer;
+import com.atguigu.mediaplayexer.videoPlayer.SystemVideoPlayer;
 
 import java.util.ArrayList;
 
@@ -41,7 +41,7 @@ public class LocalVideoFragment extends BaseFragment {
                 tv_hint.setVisibility(View.GONE);
 
 
-                adapter = new LocalVideoAdapter(context, mDatas);
+                adapter = new LocalVideoAdapter(context, mDatas, true);
                 listview.setAdapter(adapter);
 
                 listview.setOnItemClickListener(new MyOnItemClickListener());
@@ -69,12 +69,12 @@ public class LocalVideoFragment extends BaseFragment {
 //
 
 
-//            Intent intent = new Intent(context,SystemLocalVideoPlayer.class);
+//            Intent intent = new Intent(context,SystemVideoPlayer.class);
 //            intent.setDataAndType(Uri.parse(item.getVideoAddress()), "video/*");
 //            startActivity(intent);
 
             //播放列表的传递
-            Intent intent = new Intent(context, SystemLocalVideoPlayer.class);
+            Intent intent = new Intent(context, SystemVideoPlayer.class);
             Bundle bundle = new Bundle();
             bundle.putSerializable("mDatas", mDatas);
             intent.putExtras(bundle);

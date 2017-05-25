@@ -24,12 +24,14 @@ import butterknife.ButterKnife;
 public class LocalVideoAdapter extends BaseAdapter {
     private final Context context;
     private final ArrayList<LocalVideoBean> mDatas;
+    private boolean isVideo;
     private Utils utils;
 
-    public LocalVideoAdapter(Context context, ArrayList<LocalVideoBean> mDatas) {
+    public LocalVideoAdapter(Context context, ArrayList<LocalVideoBean> mDatas, boolean b) {
 
         this.context = context;
         this.mDatas = mDatas;
+        this.isVideo = b;
         utils = new Utils();
     }
 
@@ -63,6 +65,11 @@ public class LocalVideoAdapter extends BaseAdapter {
         viewHolder.tvName.setText(videoBean.getVideoName());
         viewHolder.tvDuration.setText(utils.stringForTime((int) videoBean.getDuration()));
         viewHolder.tvSize.setText(Formatter.formatFileSize(context, videoBean.getSize()));
+        if (!isVideo) {
+            viewHolder.ivIcon.setImageResource(R.drawable.music_default_bg);
+        } else {
+            viewHolder.ivIcon.setImageResource(R.drawable.video_default_icon);
+        }
 
         return convertView;
     }
